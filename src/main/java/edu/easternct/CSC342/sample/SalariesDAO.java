@@ -130,10 +130,10 @@ public Salaries viewEmployee(BigDecimal employeeId) throws SQLException {
             ps=con.prepareStatement("update CSC342.employee_salary set salary = ?," +
         	"salary_start_date = ?, salary_end_date = ?" +
             		"where employee_id = ?");
-            ps.setBigDecimal(1, empl.getEmployeeId());
-            ps.setBigDecimal(2, empl.getSalary());
-            ps.setTimestamp(3, empl.getStartDate());
-            ps.setTimestamp(4, empl.getEndDate());
+            ps.setBigDecimal(1, empl.getSalary());
+            ps.setTimestamp(2, empl.getStartDate());
+            ps.setTimestamp(3, empl.getEndDate());
+            ps.setBigDecimal(4, empl.getEmployeeId());
             ps.executeQuery();
             System.out.println("updated");
         }
@@ -141,11 +141,13 @@ public Salaries viewEmployee(BigDecimal employeeId) throws SQLException {
 	            System.out.println("Error in Salary Update" + e.getSQLState());
 	            System.out.println("/nError Code: " + e.getErrorCode());
 	            System.out.println("/nMessage: " + e.getMessage());
+	            e.printStackTrace();
 	            System.exit( 1 );
 	        }
 	    catch(Exception e) {
 	            System.out.println("unknown Error in Salary Update");
 	            System.out.println("/nMessage: " + e.getMessage());
+	            e.printStackTrace();
 	            System.exit( 1 );
         }
         finally {
