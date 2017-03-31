@@ -297,6 +297,12 @@ public class ProductDAO {
 
 	public void saveProducts(List<Product> Products) throws SQLException {
 
+		/*
+		 * String delSql = "delete from CSC342.Product"; Connection con2 =
+		 * DBConnect.getConnection(); PreparedStatement ps2 =
+		 * con2.prepareStatement(delSql); ps2.executeQuery();
+		 */
+
 		Connection con = null;
 
 		String sql1 = "Select count(*) as Product_count from CSC342.Product p WHERE p.Product_id = ?";

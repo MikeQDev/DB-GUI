@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -27,11 +28,10 @@ public class ProductGUI extends JFrame {
 			text_product_standard_price = new JTextField(10);
 
 	private JButton button_next = new JButton(">"), button_previous = new JButton("<");
-	private JButton button_save = new JButton("Save"), button_del = new JButton("Del");
+	private JButton button_save = new JButton("Save"), button_del = new JButton("Del"), button_add = new JButton("Add");
 	private JLabel label_pos = new JLabel("?/?");
 
 	private int curRecord = 0;
-	private int loaded_records = 0;
 
 	private boolean allNewSaved = true; // so we dont add records without
 										// saving..
@@ -70,14 +70,12 @@ public class ProductGUI extends JFrame {
 
 			public void actionPerformed(ActionEvent e) {
 				if (curRecord != pL.size() - 1) {
-					if (rewriteProductList()) {
+					if (rewriteCurToProductList()) {
 						curRecord++;
 						populateRecord();
 					}
-				} else if (allNewSaved) {
-					if (rewriteProductList()) {
-						createNewForm();
-					}
+				} else {
+					gotoRecord(0);
 				}
 			}
 		});
@@ -87,12 +85,12 @@ public class ProductGUI extends JFrame {
 
 			public void actionPerformed(ActionEvent e) {
 				if (curRecord != 0) {
-					if (rewriteProductList()) {
+					if (rewriteCurToProductList()) {
 						curRecord--;
 						populateRecord();
 					}
 				} else {
-					if (rewriteProductList()) {
+					if (rewriteCurToProductList()) {
 						gotoRecord(pL.size() - 1);
 					}
 				}
@@ -107,7 +105,7 @@ public class ProductGUI extends JFrame {
 
 			public void actionPerformed(ActionEvent e) {
 				try {
-					rewriteProductList();
+					rewriteCurToProductList();
 					new ProductDAO().saveProducts(pL);
 					retrieveItems();
 					allNewSaved = true;
@@ -121,10 +119,24 @@ public class ProductGUI extends JFrame {
 		button_del.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				retrieveItems();
+				pL.remove(curRecord);
+				if (curRecord == pL.size())
+					curRecord--;
+				populateRecord();
 			}
 		});
 
+		button_add.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (allNewSaved) {
+					if (rewriteCurToProductList()) {
+						createNewForm();
+					}
+				}
+			}
+		});
+
+		p_bottom.add(button_add);
 		p_bottom.add(button_save);
 		p_bottom.add(button_del);
 		p_bottom.add(label_pos);
@@ -145,18 +157,21 @@ public class ProductGUI extends JFrame {
 	private void retrieveItems() {
 		pL.clear();
 		pL = new ProductDAO().getAllProducts();
-		loaded_records = pL.size() - 1;
 		System.out.println(pL);
 	}
 
+	private int getLoadedRecordsAmt() {
+		return pL.size() - 1;
+	}
+
 	private void populateRecord() {
-		label_pos.setText(curRecord + "/" + loaded_records);
+		label_pos.setText(curRecord + "/" + getLoadedRecordsAmt());
 		loadProduct(pL.get(curRecord));
 	}
 
 	private void gotoRecord(int i) {
 		curRecord = i;
-		label_pos.setText(curRecord + "/" + loaded_records);
+		label_pos.setText(curRecord + "/" + getLoadedRecordsAmt());
 		loadProduct(pL.get(curRecord));
 	}
 
@@ -173,7 +188,7 @@ public class ProductGUI extends JFrame {
 		text_product_standard_price.setText("" + price);
 	}
 
-	private boolean rewriteProductList() {
+	private boolean rewriteCurToProductList() {
 		boolean success = true;
 		try {
 			Product t = pL.get(curRecord);
@@ -195,10 +210,10 @@ public class ProductGUI extends JFrame {
 			int nextProdId = new ProductDAO().findMaxProductId() + 1;
 
 			System.out.println("adding new item");
+			curRecord = pL.size();
 			Product newProd = new Product();
 			newProd.setProduct_id(nextProdId);
 			pL.add(newProd);
-			curRecord++;
 			populateRecord();
 
 			allNewSaved = false;
@@ -208,7 +223,6 @@ public class ProductGUI extends JFrame {
 			text_product_description.setText("");
 			text_product_finish.setText("");
 			text_product_standard_price.setText("");
-			System.out.println("asdfsdf");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
