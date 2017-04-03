@@ -119,10 +119,18 @@ public class ProductGUI extends JFrame {
 		button_del.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				pL.remove(curRecord);
-				if (curRecord == pL.size())
-					curRecord--;
-				populateRecord();
+				try {
+					new ProductDAO().deleteProduct(pL.get(curRecord).getProduct_id());
+					pL.remove(curRecord);
+					if (curRecord == pL.size())
+						curRecord--;
+					populateRecord();
+					allNewSaved = true;
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null, e1.getMessage());
+				}
 			}
 		});
 
