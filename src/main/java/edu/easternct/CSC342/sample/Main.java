@@ -6,6 +6,7 @@ import java.sql.Connection;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Main extends JFrame {
@@ -14,6 +15,8 @@ public class Main extends JFrame {
 	private String sid;
 	private String id;
 	private String pwrd;
+
+	private final static String GUI_USER = "team2", GUI_PASS = "database";
 
 	private JButton skill = new JButton("Skills");
 	private JButton salary = new JButton("Salaries");
@@ -62,7 +65,17 @@ public class Main extends JFrame {
 	}
 
 	public static void main(String[] args) {
+		/*
+		 * if (!login()) { JOptionPane.showMessageDialog(null,
+		 * "Invalid login credentials."); System.exit(0); }
+		 */
 		new Main(args);
+	}
+
+	private static boolean login() {
+		String uName = JOptionPane.showInputDialog("Username:");
+		String pWord = JOptionPane.showInputDialog("Password:");
+		return uName.equals(GUI_USER) && pWord.equals(GUI_PASS);
 	}
 
 	public String getHostname() {
