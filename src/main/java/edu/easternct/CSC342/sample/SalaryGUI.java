@@ -9,8 +9,13 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Currency;
+import java.util.Date;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -23,30 +28,30 @@ public class SalaryGUI extends JFrame {
 
 	private Connection conn;
 	private List<Salaries> sal = new ArrayList<Salaries>();
-	private JLabel labelEmplID = new JLabel("EmplID"), labelSalary = new JLabel("Salary"), 
-			labelStartDate = new JLabel("Salary Start Date"),
-			labelEndDate = new JLabel("Salary End Date");
+	private JLabel labelEmplID = new JLabel("EmplID"), labelSalary = new JLabel("Salary"),
+			labelStartDate = new JLabel("Salary Start Date"), labelEndDate = new JLabel("Salary End Date");
 	private JTextField textEmplID = new JTextField(10), textSalary = new JTextField(10),
 			textStartDate = new JTextField(10), textEndDate = new JTextField(10);
-	
+
 	private JButton button_next = new JButton(">"), button_previous = new JButton("<");
-	private JButton button_save = new JButton("Save"), button_del = new JButton("Del"), 
-			button_add = new JButton("Add");
+	private JButton button_save = new JButton("Save"), button_del = new JButton("Del"), button_add = new JButton("Add");
 	private JLabel label_pos = new JLabel("?/?");
 
 	private int curRecord = 0;
 
 	private boolean allNewSaved = true;
-	
+
 	public SalaryGUI(Connection conn) {
 		this.conn = conn;
 		this.setTitle("Salary");
 		this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.setResizable(false);
 		buildWindow();
+		retrieveItems();
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 		this.pack();
+		populateRecord();
 	}
 
 	private void buildWindow() {
@@ -102,7 +107,7 @@ public class SalaryGUI extends JFrame {
 					new SalariesDAO().saveSalaries(sal);
 					retrieveItems();
 					allNewSaved = true;
-				} catch (SQLException e1) {					
+				} catch (SQLException e1) {
 					e1.printStackTrace();
 					JOptionPane.showMessageDialog(null, e1.getMessage());
 				}
@@ -167,11 +172,28 @@ public class SalaryGUI extends JFrame {
 		BigDecimal id = s.getEmployeeId();
 		BigDecimal salary = s.getSalary();
 		Timestamp startDate = s.getStartDate();
-		Timestamp endDate = s.getEndDate();
+		Calendar startCal = Calendar.getInstance();
+		startCal.setTime(startDate);
+		int startMonth = startCal.get(Calendar.MONTH) + 1;
+		int startYear = startCal.get(Calendar.YEAR);
+		int startDay = startCal.get(Calendar.DAY_OF_MONTH);
+
 		textEmplID.setText("" + id);
 		textSalary.setText("" + salary);
-		textStartDate.setText(startDate.toString());
-		textEndDate.setText(endDate.toString());
+		// textStartDate.setText(startDate.toString());
+		textStartDate.setText(startMonth + "/" + startDay + "/" + startYear);
+
+		if (s.getEndDate() != null) {
+			Timestamp endDate = s.getEndDate();
+			Calendar endCal = Calendar.getInstance();
+			endCal.setTime(endDate);
+			int endMonth = endCal.get(Calendar.MONTH) + 1;
+			int endYear = endCal.get(Calendar.YEAR);
+			int endDay = endCal.get(Calendar.DAY_OF_MONTH);
+			textEndDate.setText(endMonth + "/" + endDay + "/" + endYear);
+		} else {
+			textEndDate.setText("N/A");
+		}
 	}
 
 	private boolean rewriteCurToSalaryList() {
@@ -179,17 +201,37 @@ public class SalaryGUI extends JFrame {
 		try {
 			Salaries s = sal.get(curRecord);
 			String ans = textEmplID.getText();
-			BigDecimal empID = new BigDecimal(Integer.parseInt(ans));
-			BigDecimal salNum = new BigDecimal(Integer.parseInt(textSalary.getText()));
+			BigDecimal empID = new BigDecimal(Double.parseDouble(ans));
+			BigDecimal salNum = new BigDecimal(Double.parseDouble(textSalary.getText()));
 			s.setEmployeeId(empID);
 			s.setSalary(salNum);
-			Timestamp sDate = new Timestamp(Integer.parseInt(textStartDate.getText()));
-			Timestamp eDate = new Timestamp(Integer.parseInt(textEndDate.getText()));
+			Timestamp sDate = null;
+			try {
+				long sTime = stringToDate(textStartDate.getText()).getTime();
+				sDate = new Timestamp(sTime);
+			} catch (ParseException e) {
+				// e.printStackTrace();
+				success = false;
+				JOptionPane.showMessageDialog(null, e.getMessage());
+			}
+			Timestamp eDate = null;
+			try {
+				if (!textEndDate.getText().equals("N/A")) {
+					long eTime = stringToDate(textEndDate.getText()).getTime();
+					eDate = new Timestamp(eTime);
+				}
+			} catch (ParseException e) {
+				success = false;
+				JOptionPane.showMessageDialog(null, e.getMessage());
+				// e.printStackTrace();
+			}
+
 			s.setStartDate(sDate);
 			s.setEndDate(eDate);
 			sal.set(curRecord, s);
 		} catch (NumberFormatException e) {
 			success = false;
+			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, e.getMessage());
 		}
 		return success;
@@ -211,10 +253,16 @@ public class SalaryGUI extends JFrame {
 			textEmplID.setText("" + nextEmplId);
 			textSalary.setText("");
 			textStartDate.setText("");
-			textEndDate.setText("");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private Date stringToDate(String dt) throws ParseException {
+		DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+		Date date = (Date) formatter.parse(dt);
+		//System.out.println(dt+"--->" + date);
+		return date;
 	}
 
 }
