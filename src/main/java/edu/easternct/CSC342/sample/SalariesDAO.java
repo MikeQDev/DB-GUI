@@ -8,6 +8,48 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class SalariesDAO {
+	private List<Salaries> sal = new ArrayList<Salaries>();
+	public List<Salaries> getAllSalaries() {
+		sal.clear();
+		ResultSet rs = null;
+		Salaries outSalaries = new Salaries();
+		Connection con = null;
+		PreparedStatement ps = null;
+		try {
+			con = DBConnect.getConnection();
+			ps = con.prepareStatement(
+					"select s.employee_id, s.salary, s.salary_start_date, s.salary_end_date,"
+							+ " from CSC342.salary s order by s.employee_id asc");
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				outSalaries = new Salaries();
+				outSalaries.setEmployeeId(rs.getBigDecimal(1));
+				outSalaries.setSalary(rs.getBigDecimal(2));
+				outSalaries.setStartDate(rs.getTimestamp(3));
+				outSalaries.setEndDate(rs.getTimestamp(4));
+				sal.add(outSalaries);
+			}
+		} catch (SQLException e) {
+			System.out.println("Error in Salary view access" + e.getSQLState());
+			System.out.println("/nError Code: " + e.getErrorCode());
+			System.out.println("/nMessage: " + e.getMessage());
+			System.exit(1);
+		} catch (Exception e) {
+			System.out.println("unknown Error in Salary view access");
+			System.out.println("/nMessage: " + e.getMessage());
+			System.exit(1);
+		} finally {
+			if (con != null)
+				System.out.println("closing Salary connection \n");
+			try {
+				rs.close();
+				ps.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return sal;
+	}
 	
     public void createSalaries(Salaries salaries) throws SQLException {
         Connection con = null;
@@ -89,14 +131,12 @@ public Salaries viewEmployee(BigDecimal employeeId) throws SQLException {
             		"from CSC342.employee_salary" +
             		"where employee_id =?");
             ps.setBigDecimal(1, employeeId);
-
             rs=ps.executeQuery();
             while(rs.next()) {
                 outSalaries.setEmployeeId(rs.getBigDecimal(1));
                 outSalaries.setSalary(rs.getBigDecimal(2));
                 outSalaries.setStartDate(rs.getTimestamp(3));
                 outSalaries.setEndDate(rs.getTimestamp(4));
-                
                 System.out.println("View Employee Success");
             }
         }
@@ -124,7 +164,6 @@ public Salaries viewEmployee(BigDecimal employeeId) throws SQLException {
 		System.out.println(empl.toString());
 		Connection con = null;
     	PreparedStatement ps= null;
-    	
         try {
         	con = DBConnect.getConnection();
             ps=con.prepareStatement("update CSC342.employee_salary set salary = ?," +
@@ -161,8 +200,7 @@ public Salaries viewEmployee(BigDecimal employeeId) throws SQLException {
 		System.out.println("Employee Id = " + employeeId + "\n");
 		Connection con = null;
     	PreparedStatement ps=null;
-    	
-        try {
+    	try {
         	con = DBConnect.getConnection();
             ps=con.prepareStatement("delete CSC342.employee_salary where employee_id=?");
             ps.setBigDecimal(1, employeeId);
@@ -193,8 +231,7 @@ public Salaries viewEmployee(BigDecimal employeeId) throws SQLException {
         	ResultSet rs = null;
         	String sql1 = "Select count(*) from CSC342.employee_salary s inner join CSC342.Employee e " + 
         				  " on (s.employee_id = e.employee_id)";
-        	
-            try {        
+        	try {        
             	con = DBConnect.getConnection();
                 ps=con.prepareStatement(sql1);
                 int salaryCt = 0;                
@@ -228,20 +265,17 @@ public Salaries viewEmployee(BigDecimal employeeId) throws SQLException {
         	String sql1 = "Select count(*) as salary_count from CSC342.employee_salary  WHERE employee_id = ?";
         	PreparedStatement ps = null;
         	ResultSet rs = null;
-
         	try {    
         	    con = DBConnect.getConnection();
                 ps=con.prepareStatement(sql1);
-
-        	    for (Iterator<Salaries> it = salary.iterator(); it.hasNext();) {
+                for (Iterator<Salaries> it = salary.iterator(); it.hasNext();) {
         		      Salaries testSalary = it.next();
                       ps.setBigDecimal(1,testSalary.getEmployeeId());  
                       rs = ps.executeQuery();
                       while(rs.next()) {
                         if (rs.getInt(1) == 1)
                         	updateSalaries(testSalary);
-                        else
-                        if (rs.getInt(1) == 0)
+                        else if (rs.getInt(1) == 0)
                         	createSalaries(testSalary);
                         else
                         	throw new RuntimeException("More than one employee has Employee Id");
@@ -253,16 +287,15 @@ public Salaries viewEmployee(BigDecimal employeeId) throws SQLException {
                  System.out.println("/nError Code: " + e.getErrorCode());
                  System.out.println("/nMessage: " + e.getMessage());
                  System.exit( 1 );
-              }
+             }
              catch(Exception e) {
                  System.out.println("unknown Error in saveSalary");
                  System.out.println("/nMessage: " + e.getMessage());
                  System.exit( 1 );
-              }
+             }
              finally {
                   rs.close();
             	  ps.close();
-        	  }
-        
-        	}
+        	 }        
+        }
 }
