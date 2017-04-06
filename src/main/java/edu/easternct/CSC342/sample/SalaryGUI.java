@@ -30,11 +30,12 @@ public class SalaryGUI extends JFrame {
 	private List<Salaries> sal = new ArrayList<Salaries>();
 	private JLabel labelEmplID = new JLabel("EmplID"), labelSalary = new JLabel("Salary"),
 			labelStartDate = new JLabel("Salary Start Date"), labelEndDate = new JLabel("Salary End Date");
-	private JTextField textEmplID = new JTextField(10), textSalary = new JTextField(10),
-			textStartDate = new JTextField(10), textEndDate = new JTextField(10);
+	private JTextField textEmplID = new JTextField(12), textSalary = new JTextField(12),
+			textStartDate = new JTextField(12), textEndDate = new JTextField(12);
 
 	private JButton button_next = new JButton(">"), button_previous = new JButton("<");
-	private JButton button_save = new JButton("Save"), button_del = new JButton("Del"), button_add = new JButton("Add");
+	private JButton button_save = new JButton("Save"), button_del = new JButton("Del"), button_add = new JButton("Add"),
+			button_jump_to = new JButton("Jump");
 	private JLabel label_pos = new JLabel("?/?");
 
 	private int curRecord = 0;
@@ -139,9 +140,24 @@ public class SalaryGUI extends JFrame {
 				}
 			}
 		});
+
+		button_jump_to.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Integer i = Integer.parseInt(JOptionPane.showInputDialog("Record to jump to:"));
+					if (i < 0 || i >= sal.size())
+						throw new Exception();
+					gotoRecord(i);
+				} catch (Exception ex) {
+					JOptionPane.showMessageDialog(null, "Invalid record to jump to!");
+				}
+			}
+		});
+
 		p_bottom.add(button_add);
 		p_bottom.add(button_save);
 		p_bottom.add(button_del);
+		p_bottom.add(button_jump_to);
 		p_bottom.add(label_pos);
 
 		this.add(p_bottom, BorderLayout.SOUTH);
@@ -261,7 +277,7 @@ public class SalaryGUI extends JFrame {
 	private Date stringToDate(String dt) throws ParseException {
 		DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 		Date date = (Date) formatter.parse(dt);
-		//System.out.println(dt+"--->" + date);
+		// System.out.println(dt+"--->" + date);
 		return date;
 	}
 
