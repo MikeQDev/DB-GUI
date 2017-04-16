@@ -263,7 +263,7 @@ public class SalaryGUI extends JFrame {
 			Salaries newSal = new Salaries();
 			newSal.setEmployeeId(nextEmplId);
 			sal.add(newSal);
-			populateRecord();
+		//	populateRecord();
 
 			allNewSaved = false;
 
