@@ -56,6 +56,7 @@ public class ProductGUI extends JFrame {
 
 		p.add(label_product_id);
 		p.add(text_product_id);
+		text_product_id.setEnabled(false);
 		p.add(label_product_line_id);
 		p.add(text_product_line_id);
 		p.add(label_product_description);

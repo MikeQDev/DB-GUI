@@ -60,6 +60,7 @@ public class SalaryGUI extends JFrame {
 
 		p.add(labelEmplID);
 		p.add(textEmplID);
+		textEmplID.setEnabled(false);
 		p.add(labelSalary);
 		p.add(textSalary);
 		p.add(labelStartDate);
