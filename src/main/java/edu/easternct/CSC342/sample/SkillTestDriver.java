@@ -60,7 +60,7 @@ public class SkillTestDriver {
 		
 		//BigDecimal increment = new BigDecimal(1);
 		//BigDecimal nextSkillId = new BigDecimal(1);  
-		String nextSkillId = "QC3";  
+		String nextSkillId = "QC11";  
 		//Timestamp tstamp;
 		//Calendar tempCalendar;
 		//Address address;
@@ -71,9 +71,11 @@ public class SkillTestDriver {
 		//nextSkillId  = skillDAO.findMaxPersonId();
 		//nextSkillId = nextSkillId.add(increment);
 	    Skill sk = new Skill(nextSkillId);
-	    sk.setSkillDescription("C++");
+	    skillDAO.duplicateSkill();
+	    sk.setSkillDescription("Roland");
 	    //sk.setSkillId("QCo");
 	    skills.add(sk);
+	    System.out.println("tttttt");
 	    skillDAO.saveSkill(skills);
 	    conn.commit();
 //	    Reports2DAO skills = new Reports2DAO();
