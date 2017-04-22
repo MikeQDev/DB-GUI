@@ -1,6 +1,9 @@
 package edu.easternct.CSC342.sample;
 
 import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,6 +11,66 @@ import java.sql.SQLException;
 
 public class ProductDAO {
 	private List<Product> pL = new ArrayList<Product>();
+
+	public void report(File f) {
+		String reportQuery = "SELECT P.PRODUCT_ID, SUM(ORDERED_QUANTITY) AS TOTAL_ORDERED, " + "PRODUCT_DESCRIPTION "
+				+ "FROM csc342.PRODUCT P " + "INNER JOIN( "
+				+ "        SELECT O.ORDER_ID, CUSTOMER_ID, ORDER_DATE, PRODUCT_ID, " + "ORDERED_QUANTITY "
+				+ "        FROM csc342.ORDER_LINE O " + "        INNER JOIN( "
+				+ "                SELECT ORDER_ID, O.CUSTOMER_ID, ORDER_DATE "
+				+ "                FROM csc342.FACTORY_ORDER O " + "                INNER JOIN ( "
+				+ "                        SELECT CUSTOMER_ID " + "                        FROM csc342.CUSTOMER "
+				+ "                        INNER JOIN csc342.EMPLOYEE "
+				+ "                        ON EMPLOYEE_ID=CUSTOMER_ID "
+				+ "                ) T ON O.CUSTOMER_ID=T.CUSTOMER_ID " + "        ) T ON O.ORDER_ID=T.ORDER_ID "
+				+ ") T ON P.PRODUCT_ID=T.PRODUCT_ID " + "GROUP BY P.PRODUCT_ID, PRODUCT_DESCRIPTION "
+				+ "ORDER BY TOTAL_ORDERED DESC ";
+		ResultSet rs = null;
+		Product outProduct = new Product();
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		try {
+
+			con = DBConnect.getConnection();
+			ps = con.prepareStatement(reportQuery);
+
+			rs = ps.executeQuery();
+
+			BufferedWriter bW = new BufferedWriter(new FileWriter(f));
+			
+			bW.write("Product_ID,Total_Ordered,Product_Description"+System.lineSeparator());
+
+			while (rs.next()) {
+				// "SELECT P.PRODUCT_ID, SUM(ORDERED_QUANTITY) AS TOTAL_ORDERED,
+				// "+ "PRODUCT_DESCRIPTION "+
+				int prodId = rs.getInt(1);
+				int orderedQty = rs.getInt(2);
+				String productDesc = rs.getString(3);
+				bW.write(prodId + "," + orderedQty + "," + productDesc + System.lineSeparator());
+			}
+			bW.close();
+		} catch (SQLException e) {
+			System.out.println("Error in Reporting " + e.getSQLState());
+			System.out.println("/nError Code: " + e.getErrorCode());
+			System.out.println("/nMessage: " + e.getMessage());
+			System.exit(1);
+		} catch (Exception e) {
+			System.out.println("unknown Error in Reporting");
+			System.out.println("/nMessage: " + e.getMessage());
+			System.exit(1);
+		} finally {
+			if (con != null)
+				System.out.println("closing Reporting connection \n");
+			try {
+				rs.close();
+				ps.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 
 	public List<Product> getAllProducts() {
 		pL.clear();
