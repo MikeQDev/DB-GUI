@@ -11,6 +11,52 @@ import java.util.List;
 public class SkillDAO {
 
 	private List<Skill> sL = new ArrayList<Skill>();
+	
+	public boolean exists(Skill s) throws SQLException{
+		return duplicateSkill(s);
+	}
+
+	public boolean duplicateSkill(Skill s) throws SQLException {
+
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		//String sql1 = "Select count(*) from ( select s.*, count(*) over (partition by s.Skill_Description) cnt from CSC342.SKILL s) where cnt > 1";
+		String sql1 = "select count(*) from CSC342.SKILL where skill_id=?";
+
+		try {
+			con = DBConnect.getConnection();
+			ps = con.prepareStatement(sql1);
+			ps.setString(1, s.getSkillId());
+			int skillCt = 0;
+
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				skillCt = rs.getInt(1);
+			}
+			if(skillCt != 0){
+				System.out.println("Duplicate Skill found: " + s.getSkillId());
+				return true;
+			}
+
+		} catch (SQLException e) {
+			System.out.println("Error in Find Duplicate Skills" + e.getSQLState());
+			System.out.println("/nError Code: " + e.getErrorCode());
+			System.out.println("/nMessage: " + e.getMessage());
+			System.exit(1);
+		} catch (Exception e) {
+			System.out.println("unknown Error in Find Duplicate Skills");
+			System.out.println("/nMessage: " + e.getMessage());
+			System.exit(1);
+		} finally {
+			if (con != null)
+				System.out.println("closing find duplicate objects \n");
+			rs.close();
+			ps.close();
+
+		}
+		return false;
+	}
 
 	public List<Skill> getAllSkills() {
 		sL.clear();
@@ -206,35 +252,6 @@ public class SkillDAO {
 
 		}
 	}
-
-	/*
-	 * public void countSkill() throws SQLException {
-	 * 
-	 * Connection con = null; PreparedStatement ps= null; ResultSet rs = null;
-	 * String sql1 =
-	 * "Select count(*) from CSC342.Skill s inner join CSC342.customer c " +
-	 * " on (p.person_id = c.customer_id)";
-	 * 
-	 * try {
-	 * 
-	 * con = DBConnect.getConnection(); ps=con.prepareStatement(sql1); int
-	 * personCt = 0;
-	 * 
-	 * rs = ps.executeQuery(); while(rs.next()) { personCt = rs.getInt(1); }
-	 * System.out.println("countPeople success " + personCt); }
-	 * catch(SQLException e) { System.out.println("Error in countPeople" +
-	 * e.getSQLState()); System.out.println("/nError Code: " +
-	 * e.getErrorCode()); System.out.println("/nMessage: " + e.getMessage());
-	 * System.exit( 1 ); } catch(Exception e) {
-	 * System.out.println("unknown Error in countPeople");
-	 * System.out.println("/nMessage: " + e.getMessage()); System.exit( 1 ); }
-	 * finally { if (con != null)
-	 * System.out.println("closing count objects \n"); rs.close(); ps.close();
-	 * 
-	 * }
-	 * 
-	 * }
-	 */
 
 	public void saveSkill(List<Skill> sk) throws SQLException {
 
