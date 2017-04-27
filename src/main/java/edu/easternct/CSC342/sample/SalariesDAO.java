@@ -298,6 +298,50 @@ public class SalariesDAO {
 		}
 	}
 
+	public boolean hasCorrespondingEmployeeId(List<Salaries> salary) throws SQLException {
+		// ensure no FK issues
+		Connection conx = null;
+		String sql1x = "Select employee_id from CSC342.employee";
+		PreparedStatement psx = null;
+		ResultSet rsx = null;
+
+		List<BigDecimal> tempEmpIdList = new ArrayList<BigDecimal>();
+
+		try {
+			conx = DBConnect.getConnection();
+			psx = conx.prepareStatement(sql1x);
+			rsx = psx.executeQuery();
+			while (rsx.next()) {
+				tempEmpIdList.add(rsx.getBigDecimal(1));
+			}
+			for (Salaries s : salary) {
+				if (!tempEmpIdList.contains(s.getEmployeeId())) {
+					return false;
+				}
+			}
+		} catch (SQLException e) {
+			System.out.println("Error in saveSalary" + e.getSQLState());
+			System.out.println("/nError Code: " + e.getErrorCode());
+			System.out.println("/nMessage: " + e.getMessage());
+			conx.commit();
+			rsx.close();
+			psx.close();
+			return false;
+		} catch (Exception e) {
+			System.out.println("unknown Error in saveSalary");
+			System.out.println("/nMessage: " + e.getMessage());
+			conx.commit();
+			rsx.close();
+			psx.close();
+			return false;
+		} finally {
+			conx.commit();
+			rsx.close();
+			psx.close();
+		}
+		return true;
+	}
+
 	public void saveSalaries(List<Salaries> salary) throws SQLException {
 		Connection con = null;
 		String sql1 = "Select count(*) as salary_count from CSC342.employee_salary  WHERE employee_id = ?";

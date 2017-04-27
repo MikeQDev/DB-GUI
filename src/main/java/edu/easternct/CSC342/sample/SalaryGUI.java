@@ -107,9 +107,13 @@ public class SalaryGUI extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					rewriteCurToSalaryList();
-					new SalariesDAO().saveSalaries(sal);
-					retrieveItems();
-					allNewSaved = true;
+					if (new SalariesDAO().hasCorrespondingEmployeeId(sal)) {
+						new SalariesDAO().saveSalaries(sal);
+						retrieveItems();
+						allNewSaved = true;
+					} else {
+						JOptionPane.showMessageDialog(null, "Employee ID doesn't exist!");
+					}
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 					JOptionPane.showMessageDialog(null, e1.getMessage());
@@ -160,8 +164,7 @@ public class SalaryGUI extends JFrame {
 		p_bottom.add(button_save);
 		p_bottom.add(button_del);
 		p_bottom.add(button_jump_to);
-		
-		
+
 		button_report.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -176,7 +179,7 @@ public class SalaryGUI extends JFrame {
 			}
 		});
 		p_bottom.add(button_report);
-		
+
 		JPanel parent = new JPanel(new GridLayout(2, 1));
 		parent.add(p_bottom);
 
@@ -286,7 +289,7 @@ public class SalaryGUI extends JFrame {
 			Salaries newSal = new Salaries();
 			newSal.setEmployeeId(nextEmplId);
 			sal.add(newSal);
-		//	populateRecord();
+			// populateRecord();
 
 			allNewSaved = false;
 
