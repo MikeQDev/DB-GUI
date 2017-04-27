@@ -1,5 +1,8 @@
 package edu.easternct.CSC342.sample;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.math.BigDecimal;
 import java.util.*;
 import java.sql.Connection;
@@ -9,6 +12,56 @@ import java.sql.SQLException;
 
 public class SalariesDAO {
 	private List<Salaries> sal = new ArrayList<Salaries>();
+
+	public void report(File f) {
+
+		String reportQuery = "select employee_id, salary_start_date, salary_end_date, salary, case when salary_end_date is null then 'N' else 'Y' end as retired from CSC342.employee_salary order by retired asc, salary desc";
+		ResultSet rs = null;
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		try {
+
+			con = DBConnect.getConnection();
+			ps = con.prepareStatement(reportQuery);
+
+			rs = ps.executeQuery();
+
+			BufferedWriter bW = new BufferedWriter(new FileWriter(f));
+
+			bW.write("EmployeeID,EmployeeStartDate,EmployeeEndDate,Salary" + System.lineSeparator());
+
+			while (rs.next()) {
+				// "SELECT P.PRODUCT_ID, SUM(ORDERED_QUANTITY) AS TOTAL_ORDERED,
+				// "+ "PRODUCT_DESCRIPTION "+
+				int empId = rs.getInt(1);
+				Date empStartDate = rs.getDate(2);
+				Date empEndDate = rs.getDate(3);
+				int salary = rs.getInt(4);
+				bW.write(empId + "," + empStartDate + "," + empEndDate + "," + salary + System.lineSeparator());
+			}
+			bW.close();
+		} catch (SQLException e) {
+			System.out.println("Error in Reporting " + e.getSQLState());
+			System.out.println("/nError Code: " + e.getErrorCode());
+			System.out.println("/nMessage: " + e.getMessage());
+			System.exit(1);
+		} catch (Exception e) {
+			System.out.println("unknown Error in Reporting");
+			System.out.println("/nMessage: " + e.getMessage());
+			System.exit(1);
+		} finally {
+			if (con != null)
+				System.out.println("closing Reporting connection \n");
+			try {
+				rs.close();
+				ps.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
 
 	public List<Salaries> getAllSalaries() {
 		sal.clear();

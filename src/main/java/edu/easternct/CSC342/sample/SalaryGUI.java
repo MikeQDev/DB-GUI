@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,6 +19,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -35,7 +37,7 @@ public class SalaryGUI extends JFrame {
 
 	private JButton button_next = new JButton(">"), button_previous = new JButton("<");
 	private JButton button_save = new JButton("Save"), button_del = new JButton("Del"), button_add = new JButton("Add"),
-			button_jump_to = new JButton("Jump");
+			button_jump_to = new JButton("Jump"), button_report = new JButton("Report");
 	private JLabel label_pos = new JLabel("?/?");
 
 	private int curRecord = 0;
@@ -60,7 +62,6 @@ public class SalaryGUI extends JFrame {
 
 		p.add(labelEmplID);
 		p.add(textEmplID);
-		textEmplID.setEnabled(false);
 		p.add(labelSalary);
 		p.add(textSalary);
 		p.add(labelStartDate);
@@ -159,9 +160,31 @@ public class SalaryGUI extends JFrame {
 		p_bottom.add(button_save);
 		p_bottom.add(button_del);
 		p_bottom.add(button_jump_to);
-		p_bottom.add(label_pos);
+		
+		
+		button_report.addActionListener(new ActionListener() {
 
-		this.add(p_bottom, BorderLayout.SOUTH);
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null, "Reporting on salaries high to low, not retired/retired");
+				JFileChooser jF = new JFileChooser();
+				File f = null;
+				if (jF.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+					f = jF.getSelectedFile();
+					new SalariesDAO().report(f);
+					JOptionPane.showMessageDialog(null, "Wrote to " + f);
+				}
+			}
+		});
+		p_bottom.add(button_report);
+		
+		JPanel parent = new JPanel(new GridLayout(2, 1));
+		parent.add(p_bottom);
+
+		JPanel child2 = new JPanel();
+		child2.add(label_pos);
+		parent.add(child2);
+
+		this.add(parent, BorderLayout.SOUTH);
 	}
 
 	private void retrieveItems() {
