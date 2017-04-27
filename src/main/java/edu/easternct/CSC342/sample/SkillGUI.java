@@ -4,12 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -24,7 +26,7 @@ public class SkillGUI extends JFrame {
 
 	private JButton button_next = new JButton(">"), button_previous = new JButton("<");
 	private JButton button_save = new JButton("Save"), button_del = new JButton("Del"), button_add = new JButton("Add"),
-			button_jump_to = new JButton("Jump");
+			button_jump_to = new JButton("Jump"), button_report = new JButton("Report");;
 	private JLabel label_pos = new JLabel("?/?");
 
 	private int curRecord = 0;
@@ -151,12 +153,34 @@ public class SkillGUI extends JFrame {
 		p_bottom.add(button_save);
 		p_bottom.add(button_del);
 		p_bottom.add(button_jump_to);
-		p_bottom.add(label_pos);
 
-		this.add(p_bottom, BorderLayout.SOUTH);
+		button_report.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(null, "Reporting on most common employee's skills");
+				JFileChooser jF = new JFileChooser();
+				File f = null;
+				if (jF.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+					f = jF.getSelectedFile();
+					new SkillDAO().report(f);
+					JOptionPane.showMessageDialog(null, "Wrote to " + f);
+				}
+			}
+		});
+
+		p_bottom.add(button_report);
+
+		JPanel parent = new JPanel(new GridLayout(2, 1));
+		parent.add(p_bottom);
+
+		JPanel child2 = new JPanel();
+		child2.add(label_pos);
+		parent.add(child2);
+
+		this.add(parent, BorderLayout.SOUTH);
 
 	}
-	
+
 	private void retrieveItems() {
 		sL.clear();
 		sL = new SkillDAO().getAllSkills();
@@ -201,23 +225,23 @@ public class SkillGUI extends JFrame {
 
 	private void createNewForm() {
 		// clear out
-		//try {
-			//int nextProdId = new SkillDAO().findMaxProductId() + 1;
+		// try {
+		// int nextProdId = new SkillDAO().findMaxProductId() + 1;
 
-			System.out.println("adding new item");
-			curRecord = sL.size();
-			Skill newSkill = new Skill();
-			sL.add(newSkill);
-			populateRecord();
+		System.out.println("adding new item");
+		curRecord = sL.size();
+		Skill newSkill = new Skill();
+		sL.add(newSkill);
+		populateRecord();
 
-			allNewSaved = false;
+		allNewSaved = false;
 
-			text_skill_id.setText("");
-			text_skill_desc.setText("");
-		/* catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
+		text_skill_id.setText("");
+		text_skill_desc.setText("");
+		/*
+		 * catch (SQLException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); }
+		 */
 
 	}
 

@@ -1,5 +1,8 @@
 package edu.easternct.CSC342.sample;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -11,8 +14,53 @@ import java.util.List;
 public class SkillDAO {
 
 	private List<Skill> sL = new ArrayList<Skill>();
-	
-	public boolean exists(Skill s) throws SQLException{
+
+	public void report(File f) {
+		String reportQuery = "select skill_id, count(*) as employees_with_skill from csc342.employee_skills group by skill_id order by count(*) desc";
+		ResultSet rs = null;
+		Connection con = null;
+		PreparedStatement ps = null;
+
+		try {
+
+			con = DBConnect.getConnection();
+			ps = con.prepareStatement(reportQuery);
+
+			rs = ps.executeQuery();
+
+			BufferedWriter bW = new BufferedWriter(new FileWriter(f));
+
+			bW.write("skill_id,employees_with_skill" + System.lineSeparator());
+
+			while (rs.next()) {
+				String skillId = rs.getString(1);
+				int amountofpeople = rs.getInt(2);
+				bW.write(skillId + "," + amountofpeople + System.lineSeparator());
+			}
+			bW.close();
+		} catch (SQLException e) {
+			System.out.println("Error in Reporting " + e.getSQLState());
+			System.out.println("/nError Code: " + e.getErrorCode());
+			System.out.println("/nMessage: " + e.getMessage());
+			System.exit(1);
+		} catch (Exception e) {
+			System.out.println("unknown Error in Reporting");
+			System.out.println("/nMessage: " + e.getMessage());
+			System.exit(1);
+		} finally {
+			if (con != null)
+				System.out.println("closing Reporting connection \n");
+			try {
+				rs.close();
+				ps.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public boolean exists(Skill s) throws SQLException {
 		return duplicateSkill(s);
 	}
 
@@ -21,7 +69,9 @@ public class SkillDAO {
 		Connection con = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		//String sql1 = "Select count(*) from ( select s.*, count(*) over (partition by s.Skill_Description) cnt from CSC342.SKILL s) where cnt > 1";
+		// String sql1 = "Select count(*) from ( select s.*, count(*) over
+		// (partition by s.Skill_Description) cnt from CSC342.SKILL s) where cnt
+		// > 1";
 		String sql1 = "select count(*) from CSC342.SKILL where skill_id=?";
 
 		try {
@@ -34,7 +84,7 @@ public class SkillDAO {
 			while (rs.next()) {
 				skillCt = rs.getInt(1);
 			}
-			if(skillCt != 0){
+			if (skillCt != 0) {
 				System.out.println("Duplicate Skill found: " + s.getSkillId());
 				return true;
 			}
