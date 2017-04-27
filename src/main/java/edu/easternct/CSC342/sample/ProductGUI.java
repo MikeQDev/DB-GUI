@@ -184,8 +184,6 @@ public class ProductGUI extends JFrame {
 		});
 		p_bottom.add(button_report);
 
-		p_bottom.add(label_pos);
-
 		JPanel parent = new JPanel(new GridLayout(2, 1));
 		parent.add(p_bottom);
 
