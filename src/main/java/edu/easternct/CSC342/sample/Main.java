@@ -65,16 +65,18 @@ public class Main extends JFrame {
 	}
 
 	public static void main(String[] args) {
-		/*
-		 * if (!login()) { JOptionPane.showMessageDialog(null,
-		 * "Invalid login credentials."); System.exit(0); }
-		 */
+
+		if (!login()) {
+			JOptionPane.showMessageDialog(null, "Invalid login credentials.");
+			System.exit(0);
+		}
+
 		new Main(args);
 	}
 
 	private static boolean login() {
-		String uName = JOptionPane.showInputDialog("Username:");
-		String pWord = JOptionPane.showInputDialog("Password:");
+		String uName = JOptionPane.showInputDialog("Username (team2):");
+		String pWord = JOptionPane.showInputDialog("Password (database):");
 		return uName.equals(GUI_USER) && pWord.equals(GUI_PASS);
 	}
 
@@ -120,12 +122,11 @@ public class Main extends JFrame {
 
 	private void buildConnection(String[] args) {
 		try {
-
-			this.setHostname(args[0]);
-			this.setPort(args[1]);
-			this.setSid(args[2]);
-			this.setId(args[3]);
-			this.setPwrd(args[4]);
+			this.setHostname("localhost");
+			this.setPort("1521");
+			this.setSid("CSC342");
+			this.setId("team00");
+			this.setPwrd("team00");
 		} catch (Exception ex) {
 			System.out.println("Error in testing");
 			System.out.println(ex.getMessage());
